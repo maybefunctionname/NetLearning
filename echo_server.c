@@ -13,8 +13,8 @@ int main (int argc , char* argv[]) {
     int serv_sock, clnt_sock;
     // 服务端、客户端地址
     struct sockaddr_in serv_addr, clnt_addr;
+    char message[BUF_SIZE];
     // 传输的消息
-    char* message = "hello world!";
     if (argc != 2) {
         printf("the Usage : %s <PORT>", argv[0]);
         exit(1);
@@ -39,14 +39,21 @@ int main (int argc , char* argv[]) {
         error_handling("listen() error");
     }
     socklen_t clnt_addr_size = sizeof(clnt_addr);
-    // 调用accept时，阻塞当前线程, 客户端实际连接着服务端时，返回客户端的套接字
-    clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_addr, &clnt_addr_size);
-    if (clnt_sock == -1) {
-        error_handling("accept() error");
+    int str_len = 0;
+    for(int i=0; i<5; ++i){
+        clnt_sock=accept(serv_sock, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+        if (clnt_sock == -1) {
+            error_handling("accept() error");
+        }
+        else {
+            printf("Connected client %d \n", i+1);
+        }
+        while ((str_len = read(clnt_sock, message, BUF_SIZE)) != 0) {
+            write(clnt_sock, message, str_len);
+        }
+        close(clnt_sock);
     }
-    printf("Connecting .......");
-    // 往客户端套接字里写入数据
-    write(clnt_sock, message, strlen(message));
-    close(clnt_sock);
-    close(serv_sock);    
+    close(serv_sock);
+    return 0;
+    
 }

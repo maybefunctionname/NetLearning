@@ -10,6 +10,7 @@ const int BUF_SIZE = 1024;
 
 int main (int argc, char * argv[]) {
     int sock;
+    int str_len = 0;
     struct sockaddr_in serv_addr;
     char message[BUF_SIZE];
     if (argc != 3) {
@@ -27,11 +28,32 @@ int main (int argc, char * argv[]) {
     serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_addr.sin_port = htons(atoi(argv[2]));
 
-    connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
-    
-    int read_len = read(sock, message, BUF_SIZE-1);
-    message[read_len] = '\0';
-    
-    printf("the message from server is : %s \n", message);
-    close(sock);
+    if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1){
+        error_handling("connect() error");
     }
+    else {
+        puts("Connected.........");
+    }
+    int recv_len = 0;
+    int recv_cnt = 0;
+    while (1) {
+        fputs("Input message(Q to quit): ", stdout);
+        fgets(message, BUF_SIZE, stdin);
+        if (!strcmp(message, "q\n") || !strcmp(message, "Q\n")) {
+            break;
+        }
+        str_len=write(sock, message, strlen(message));
+        recv_len = 0;
+        while (recv_len < str_len) {
+            recv_cnt = read(sock, &message[recv_len], BUF_SIZE-1);
+            if (recv_cnt == -1) {
+                error_handling("read() error!");
+            }
+            recv_len+=recv_cnt;
+        }
+        message[recv_len] = 0;
+        printf("message from server: %s", message);
+    }
+    close(sock);
+    return 1;
+}
