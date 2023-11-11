@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     fputs("Operand count :", stdout);
     scanf("%d", &opnd_cnt);
     opmsg[0]=(char)opnd_cnt;
-
+    
     for (int i=0; i < opnd_cnt; ++i) {
         printf("Operand %d: ", i+1);
         scanf("%d", (int*)&opmsg[i*OPSZ+1]);
@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     fgetc(stdin);
     fputs("Operator: ", stdout);
     scanf("%c", &opmsg[opnd_cnt*OPSZ+1]);
+    printf("the opmsg is : %s", opmsg);
     write(sock, opmsg, opnd_cnt*OPSZ+2);
     read(sock, &result, RLT_SIZE);
     printf("Operation result: %d \n", result);
